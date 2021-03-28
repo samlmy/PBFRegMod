@@ -1,0 +1,122 @@
+---
+title: "STA302MiniProject1"
+author: "MIngyang Li"
+date: "5/23/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+bfc <- read.csv("body_fat_complete.csv", header=T)
+set.seed(1004931425)
+rows <-sample(1:250, 30, replace=FALSE)
+dataset1<-bfc[rows,]
+dataset1
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(dataset1$Pct.BF~dataset1$Age, main="Percent Bodyfat vs Age")
+plot(dataset1$Pct.BF~dataset1$Weight, main="Percent Bodyfat vs Weight")
+plot(dataset1$Pct.BF~dataset1$Height, main="Percent Bodyfat vs Height")
+plot(dataset1$Pct.BF~dataset1$Neck, main="Percent Bodyfat vs Neck")
+plot(dataset1$Pct.BF~dataset1$Chest, main="Percent Bodyfat vs Chest")
+plot(dataset1$Pct.BF~dataset1$Abdomen, main="Percent Bodyfat vs Abdomen")
+plot(dataset1$Pct.BF~dataset1$waist, main="Percent Bodyfat vs Waist")
+plot(dataset1$Pct.BF~dataset1$Hip, main="Percent Bodyfat vs Hip")
+plot(dataset1$Pct.BF~dataset1$Thigh, main="Percent Bodyfat vs Thight")
+plot(dataset1$Pct.BF~dataset1$Knee, main="Percent Bodyfat vs Knee")
+plot(dataset1$Pct.BF~dataset1$Ankle, main="Percent Bodyfat vs Ankle")
+plot(dataset1$Pct.BF~dataset1$Bicep, main="Percent Bodyfat vs Bicep")
+plot(dataset1$Pct.BF~dataset1$Forearm, main="Percent Bodyfat vs Forearm")
+plot(dataset1$Pct.BF~dataset1$Wrist, main="Percent Bodyfat vs Wrist")
+```
+
+```{r}
+cor(dataset1$Pct.BF, dataset1$Age)
+cor(dataset1$Pct.BF, dataset1$Weight)
+cor(dataset1$Pct.BF, dataset1$Height)
+cor(dataset1$Pct.BF, dataset1$Neck)
+cor(dataset1$Pct.BF, dataset1$Chest)
+cor(dataset1$Pct.BF, dataset1$Abdomen)
+cor(dataset1$Pct.BF, dataset1$waist)
+cor(dataset1$Pct.BF, dataset1$Hip)
+cor(dataset1$Pct.BF, dataset1$Thigh)
+cor(dataset1$Pct.BF, dataset1$Knee)
+cor(dataset1$Pct.BF, dataset1$Ankle)
+cor(dataset1$Pct.BF, dataset1$Bicep)
+cor(dataset1$Pct.BF, dataset1$Forearm)
+cor(dataset1$Pct.BF, dataset1$Wrist)
+```
+
+```{r}
+plot(dataset1$Pct.BF~dataset1$Abdome, main="Percentage of Body Fat vs Abdomen Circumference", xlab="Abdomen Circumference", 
+     ylab = "Percentage of Body Fat")
+model <- lm(Pct.BF~Abdomen, dataset1)
+abline(model, col="red")
+
+par(mfrow=c(2,2))
+plot(model)
+```
+
+```{r}
+library(dplyr)
+library(car)
+plot(rstandard(model)~dataset1$Abdomen, main="Standard. Residuals vs Predictor",
+     xlab="Abdomen Circumference", ylab="Standardized Residuals")
+plot(sqrt(abs(rstandard(model)))~dataset1$Abdomen, main="|Standard. Residuals|^0.5 vs Predictor",
+     xlab="Abdomen Circumference", ylab="|Standardized Residuals|^0.5")
+m <- lm(sqrt(abs(rstandard(model)))~dataset1$Abdomen)
+abline(a = m$coefficients[1], b = m$coefficients[2])
+```
+
+
+```{r}
+hii <- hatvalues(model)
+which(hii > 4/nrow(dataset1))
+
+r <- rstandard(model)
+which(r>=2|r<=-2)
+
+new_dat <- dataset1[-c(4,10),]
+new_dat
+
+plot(new_dat$Pct.BF~new_dat$Abdomen, main="Percent Body Fat vs Abdomen Circumference", xlab="Abdomen Circumference", 
+     ylab = "Percent Body Fat")
+new_mod <- lm(Pct.BF~Abdomen, new_dat)
+abline(new_mod, col = "red")
+plot(new_mod)
+
+plot(rstandard(new_mod)~new_dat$Abdomen, main="Standard. Residuals vs Predictor",
+     xlab="Abdomen Circumference", ylab="Standardized Residuals")
+plot(sqrt(abs(rstandard(new_mod)))~new_dat$Abdomen, main="|Standard. Residuals|^0.5 vs Predictor",
+     xlab="Abdomen Circumference", ylab="|Standardized Residuals|^0.5")
+m <- lm(sqrt(abs(rstandard(new_mod)))~new_dat$Abdomen)
+abline(a = m$coefficients[1], b = m$coefficients[2])
+
+box <- boxCox(new_mod)
+lamda = box$x[which(box$y==max(box$y))]
+new_mod2 <- lm(Pct.BF^0.828~Abdomen, new_dat)
+
+plot(new_mod2)
+
+plot(rstandard(new_mod2)~new_dat$Abdomen, main="Standard. Residuals vs Predictor",
+     xlab="Abdomen Circumference", ylab="Standardized Residuals")
+plot(sqrt(abs(rstandard(new_mod2)))~new_dat$Abdomen, main="|Standard. Residuals|^0.5 vs Predictor",
+     xlab="Abdomen Circumference", ylab="|Standardized Residuals|^0.5")
+m <- lm(sqrt(abs(rstandard(new_mod2)))~new_dat$Abdomen)
+abline(a = m$coefficients[1], b = m$coefficients[2])
+
+plot(new_dat$Pct.BF~new_dat$Abdomen, main="Percent Body Fat vs Abdomen Circumference", xlab="Abdomen Circumference", 
+     ylab = "Percent Body Fat")
+new_mod2 <- lm(Pct.BF~Abdomen, new_dat)
+abline(new_mod2, col = "red")
+
+summary(new_mod2)
+```
+
