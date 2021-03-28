@@ -1,0 +1,92 @@
+---
+title: "STA302_P2"
+author: "MIngyang Li"
+date: "6/6/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+bfc <- read.csv("body_fat_complete.csv", header=T)
+set.seed(1004931425)
+rows <-sample(1:250, 30, replace=FALSE)
+dataset1<-bfc[rows,]
+dataset1
+
+model<-lm(Pct.BF~Abdomen, dataset1)
+summary(model)
+```
+
+```{r}
+mod1<-lm(Pct.BF~Abdomen+Age+Weight+Height+Neck+Chest+waist+Hip+Thigh+Knee+Ankle+Bicep+Forearm+Wrist, dataset1)
+summary(mod1)
+```
+
+```{r}
+mod<-lm(Pct.BF~Abdomen+Neck+Forearm, dataset1)
+summary(mod)
+
+```
+
+
+```{r}
+mod2<-lm(Pct.BF~Abdomen+Neck, dataset1)
+mod3<-lm(Pct.BF~Abdomen+Forearm, dataset1)
+anova(mod2,mod)
+anova(mod3,mod)
+```
+
+```{r}
+h<-hatvalues(mod)
+threshold<-2*(length(mod$coefficients/nrow(dataset1)))
+which(h>threshold)
+```
+
+```{r}
+par(mfrow=c(2,3))
+plot(dataset1$Abdomen~dataset1$Neck, main="Abdomen versus Neck")
+plot(dataset1$Abdomen~dataset1$Forearm, main="Abdomen versus Forearm")
+plot(dataset1$Neck~dataset1$Forearm, main="Neck versus Forearm")
+plot(dataset1$Neck~dataset1$Abdomen, main="Neck versus Abdomen")
+plot(dataset1$Forearm~dataset1$Abdomen, main="Forearm versus Abdomen")
+plot(dataset1$Forearm~dataset1$Neck, main="Forearm versus Neck")
+```
+
+
+```{r}
+plot(mod)
+par(mfrow=c(2,2))
+plot(rstudent(mod)~dataset1$Abdomen, xlab="Abdomen", ylab="standard. residuals")
+plot(rstudent(mod)~dataset1$Neck, xlab="Neck", ylab="standard. residuals")
+plot(rstudent(mod)~dataset1$Forearm, xlab="Forearm", ylab="standard. residuals")
+plot(rstudent(mod)~fitted(mod), xlab="Fitted Values", ylab="standard. residuals")
+
+```
+
+```{r}
+plot(dataset1$Pct.BF ~ fitted(mod), xlab="Fitted Values", ylab="Percant Bodyfat")
+abline(a = 0, b = 1)
+```
+
+```{r}
+D <- cooks.distance(mod)
+cutoff <- qf(0.5, 4, 26, lower.tail=T)
+which(D > cutoff)
+fits <- dffits(mod)
+cutoff <- 2*sqrt(4/30)
+which(abs(fits) > cutoff)
+dfb <- dfbetas(mod)
+cutoff <- 2/sqrt(30)
+which(abs(dfb[,2]) > cutoff)
+which(abs(dfb[,3]) > cutoff)
+which(abs(dfb[,4]) > cutoff)
+```
+
+
+
+
+
+
